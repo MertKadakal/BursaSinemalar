@@ -1,0 +1,8 @@
+<resources>
+    <string name="deneme">deneme</string>
+    <string-array name="spinner_items">
+        <item>Öğe 1</item>
+        <item>Öğe 2</item>
+        <item>Öğe 3</item>
+    </string-array>
+</resources>

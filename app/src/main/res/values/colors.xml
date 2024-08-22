@@ -1,0 +1,10 @@
+<resources>
+    <color name="backgroundColor">#f0f0f0</color>
+    <color name="buttonColor">#6200EE</color>
+    <color name="buttonPressedColor">#3700B3</color>
+    <color name="white">#FFFFFF</color>
+    <!-- Gradient Colors -->
+    <color name="startColor">#FF7E5F</color>
+    <color name="centerColor">#FD3A84</color>
+    <color name="endColor">#8B2AB3</color>
+</resources>
