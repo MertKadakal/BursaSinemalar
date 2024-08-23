@@ -1,10 +1,14 @@
 package mert.kadakal.deneme;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,6 +18,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class Avm_secili extends AppCompatActivity {
@@ -37,12 +42,15 @@ public class Avm_secili extends AppCompatActivity {
             String url = "https://www.paribucineverse.com/sinemalar/carrefour-bursa";
             new FetchDataTask().execute(url);
         }
+
+
     }
 
     private class FetchDataTask extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... urls) {
+
             String url = urls[0];
             try {
                 toptext.setText(getIntent().getStringExtra("AVM_ISMI") + " AVM'de vizyondaki filmler");
@@ -58,7 +66,7 @@ public class Avm_secili extends AppCompatActivity {
                         int to_add = Integer.parseInt(time.text().split(":")[0]);
                         int last_added = 0;
                         try {
-                            last_added = Integer.parseInt(times.toString().split("\n")[times.toString().split("\n").length-1].split(":")[0]);
+                            last_added = Integer.parseInt(times.toString().split("<br>")[times.toString().split("<br>").length-1].split(":")[0]);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -79,6 +87,24 @@ public class Avm_secili extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    String film_ismi = items.get(i).split("<br>")[0].split("<i>")[1].split("</i>")[0];
+                    String film_turu = items.get(i).split("<br>")[2];
+                    String film_saatleri = items.get(i).split("------")[2];
+
+                    Intent intent = new Intent(Avm_secili.this, Secili_film.class);
+                    intent.putExtra("FILM_ISMI", film_ismi);
+                    intent.putExtra("FILM_TURU", film_turu);
+                    intent.putExtra("FILM_SAATLERI", film_saatleri);
+                    intent.putExtra("URL", url);
+                    intent.putExtra("ind", i);
+                    startActivity(intent);
+                }
+            });
+
             return null;
         }
 
@@ -87,6 +113,7 @@ public class Avm_secili extends AppCompatActivity {
             // Listeyi güncelle
             adapter.notifyDataSetChanged();
         }
+
     }
 }
 

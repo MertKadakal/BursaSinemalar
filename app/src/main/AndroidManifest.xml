@@ -28,6 +28,11 @@
             android:exported="true">
 
         </activity>
+        <activity
+            android:name="mert.kadakal.deneme.Secili_film"
+            android:exported="true">
+
+        </activity>
     </application>
 
 </manifest>
