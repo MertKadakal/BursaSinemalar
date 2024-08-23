@@ -3,6 +3,8 @@ package mert.kadakal.deneme;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -30,8 +32,10 @@ public class Aranan_tur extends AppCompatActivity {
         adapter = new HtmlArrayAdapter(this, R.layout.list_item, items);
         listView.setAdapter(adapter);
         topText = (TextView) findViewById(R.id.aranan_tur_ust);
-        topText.setText(getIntent().getStringExtra("TÜR") + " türündeki filmler");
+        String toptextHtml = String.format("<b>%s türündeki filmler</b>", String.valueOf(getIntent().getStringExtra("TÜR").toUpperCase().charAt(0)) + getIntent().getStringExtra("TÜR").toLowerCase().substring(1));
+        topText.setText(Html.fromHtml(toptextHtml));
 
+        Log.d("Türdeki filmler", getIntent().getStringExtra("FILMLER").substring(1));
         for (String item : getIntent().getStringExtra("FILMLER").substring(1).split(",")) {
             items.add(item);
         }

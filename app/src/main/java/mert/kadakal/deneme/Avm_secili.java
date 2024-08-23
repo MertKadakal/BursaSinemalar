@@ -3,6 +3,7 @@ package mert.kadakal.deneme;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -91,7 +92,9 @@ public class Avm_secili extends AppCompatActivity {
 
             String url = urls[0];
             try {
-                toptext.setText(getIntent().getStringExtra("AVM_ISMI") + " AVM'de vizyondaki filmler");
+                String topTextHtml = String.format("<b>%s AVM'de vizyondaki filmler</b>", getIntent().getStringExtra("AVM_ISMI"));
+                toptext.setText(Html.fromHtml(topTextHtml));
+
                 Document document = Jsoup.connect(url).get();
                 Elements films = document.select(".item-list-detail");
 

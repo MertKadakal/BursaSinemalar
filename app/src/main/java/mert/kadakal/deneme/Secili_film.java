@@ -59,16 +59,27 @@ public class Secili_film extends AppCompatActivity {
         film_saatleri.setText(Html.fromHtml(film_saatleriHtml));
 
         en_yakin_seans = (TextView) findViewById(R.id.en_yakin_seans);
-        String en_yakin_seansStr = getIntent().getStringExtra("FILM_SAATLERI").toString().split("<br>")[1].substring(0,5);
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
-        Log.d("SAAT-DK", String.valueOf(hour));
         int current_mins = hour*60 + minute;
-        int seans_hour = Integer.parseInt(en_yakin_seansStr.split(":")[0]);
-        int seans_min = Integer.parseInt(en_yakin_seansStr.split(":")[1]);
-        int seans_mins = seans_hour*60 + seans_min;
-        en_yakin_seans.setText(String.format("En yakın seans %d saat %d dakika sonra", (seans_mins-current_mins)/60, (seans_mins-current_mins)%60));
+        int seans_hour = 0;
+        int seans_min = 0;
+        int seans_mins = 0;
+        for (String seans : getIntent().getStringExtra("FILM_SAATLERI").toString().substring(4, getIntent().getStringExtra("FILM_SAATLERI").toString().length()-3).split("<br>")) {
+            seans_hour = Integer.parseInt(seans.split(":")[0]);
+            seans_min = Integer.parseInt(seans.split(":")[1]);
+            if (seans_hour*60 + seans_min > current_mins) {
+                seans_mins = seans_hour*60 + seans_min;
+                break;
+            }
+        }
+        if ((seans_mins-current_mins) < 60) {
+            en_yakin_seans.setText(String.format("En yakın seans %d dakika sonra", (seans_mins-current_mins)%60));
+        }
+        else {
+            en_yakin_seans.setText(String.format("En yakın seans %d saat %d dakika sonra", (seans_mins-current_mins)/60, (seans_mins-current_mins)%60));
+        }
 
         imageView = findViewById(R.id.imageView);
 
@@ -92,9 +103,7 @@ public class Secili_film extends AppCompatActivity {
                             @Override
                             public void run() {
                                 // Glide kullanarak görseli ImageView'a yükle
-                                Glide.with(Secili_film.this)
-                                        .load(imgUrl)
-                                        .into(imageView);
+                                Glide.with(Secili_film.this).load(imgUrl).into(imageView);
                             }
                         });
                     }
