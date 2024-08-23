@@ -33,14 +33,16 @@
 
     <TextView
         android:id="@+id/en_yakin_seans"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="644dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="596dp"
+        android:layout_marginEnd="60dp"
         android:gravity="center"
         android:text="TextView"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -62,7 +64,7 @@
         android:layout_width="202dp"
         android:layout_height="240dp"
         android:layout_centerInParent="true"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="128dp"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"

@@ -33,7 +33,7 @@ public class Secili_film extends AppCompatActivity {
         setContentView(R.layout.secili_film);
 
         film_ismi = (TextView) findViewById(R.id.film_ismi);
-        film_ismi.setText(getIntent().getStringExtra("FILM_ISMI"));
+        film_ismi.setText(Html.fromHtml(String.format("<b>%s</b>", getIntent().getStringExtra("FILM_ISMI"))));
 
         String film_turuHtml = String.format("<b>Tür</b><br><br>%s", getIntent().getStringExtra("FILM_TURU"));
         film_turu = (TextView) findViewById(R.id.film_turu);
@@ -46,7 +46,16 @@ public class Secili_film extends AppCompatActivity {
             saatlerListe.append(saat + "<br>");
         }
         saatlerListe.delete(saatlerListe.length()-4, saatlerListe.length()-1);
-        String film_saatleriHtml = String.format("<b>Seanslar</b><br>%s", saatlerListe.toString());
+        StringBuilder gosterilecek_seanslar = new StringBuilder();
+        for (int i = 1; i < 4; i++) {
+            if (i < saatlerListe.toString().split("<br>").length) {
+                gosterilecek_seanslar.append(saatlerListe.toString().split("<br>")[i] + "<br>");
+            }
+        }
+        if (saatlerListe.toString().split("<br>").length > 4) {
+            gosterilecek_seanslar.append(":::");
+        }
+        String film_saatleriHtml = String.format("<b>Seanslar</b><br><br>%s", gosterilecek_seanslar);
         film_saatleri.setText(Html.fromHtml(film_saatleriHtml));
 
         en_yakin_seans = (TextView) findViewById(R.id.en_yakin_seans);

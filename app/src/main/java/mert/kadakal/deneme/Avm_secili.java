@@ -3,9 +3,11 @@ package mert.kadakal.deneme;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,7 +20,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class Avm_secili extends AppCompatActivity {
@@ -26,6 +27,8 @@ public class Avm_secili extends AppCompatActivity {
     private ArrayList<String> items;
     private HtmlArrayAdapter adapter;
     private TextView toptext;
+    private EditText turAra;
+    private String enteredText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,7 @@ public class Avm_secili extends AppCompatActivity {
         adapter = new HtmlArrayAdapter(this, R.layout.list_item, items);
         listView.setAdapter(adapter);
         toptext = (TextView) findViewById(R.id.secili_avm_ust);
+        turAra = (EditText) findViewById(R.id.tur_giriniz);
 
         if (getIntent().getStringExtra("AVM_ISMI").equals("Carrefour")) {
             String url = "https://www.paribucineverse.com/sinemalar/carrefour-bursa";
@@ -44,6 +48,40 @@ public class Avm_secili extends AppCompatActivity {
         }
 
 
+        turAra.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    // Enter tuşuna basıldığında yapılacak işlemler
+                    enteredText = turAra.getText().toString().toLowerCase();
+                    if (turFiltrele(enteredText).isEmpty()) {
+                        Toast.makeText(Avm_secili.this, "İstenen türde film bulunamadı", Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        try {
+                            Intent intent = new Intent(Avm_secili.this, Aranan_tur.class);
+                            intent.putExtra("FILMLER", turFiltrele(enteredText).toString());
+                            intent.putExtra("TÜR", enteredText);
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return true; // Tuş olayını işlediğinizi belirtir
+                }
+                return false; // Diğer tuş olaylarını işlemek için false döner
+            }
+        });
+    }
+
+    private ArrayList<String> turFiltrele(String aranan) {
+        ArrayList<String> aranan_turdekiler = new ArrayList<>();
+        for (String item : items) {
+            if (item.toLowerCase().split("<br>")[2].equals(aranan)) {
+                aranan_turdekiler.add(item);
+            }
+        }
+        return aranan_turdekiler;
     }
 
     private class FetchDataTask extends AsyncTask<String, Void, Void> {
@@ -70,7 +108,6 @@ public class Avm_secili extends AppCompatActivity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-
                         if (to_add < last_added) {
                             times.append("***<br>");
                         }
