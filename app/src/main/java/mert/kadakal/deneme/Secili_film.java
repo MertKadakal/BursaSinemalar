@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -68,7 +69,7 @@ public class Secili_film extends AppCompatActivity {
         int seans_mins = 0;
         for (String seans : getIntent().getStringExtra("FILM_SAATLERI").toString().substring(4, getIntent().getStringExtra("FILM_SAATLERI").toString().length()-3).split("<br>")) {
             seans_hour = Integer.parseInt(seans.split(":")[0]);
-            seans_min = Integer.parseInt(seans.split(":")[1]);
+            seans_min = Integer.parseInt(seans.split(":")[1].substring(0,2));
             if (seans_hour*60 + seans_min > current_mins) {
                 seans_mins = seans_hour*60 + seans_min;
                 break;
@@ -85,30 +86,55 @@ public class Secili_film extends AppCompatActivity {
 
         // Görseli web sayfasından çekmek için yeni bir thread başlatın
         new Thread(new Runnable() {
+            String img_url = null;
             @Override
             public void run() {
+                // Logcat için Tag
+                String TAG = "FilmSrcLogger";
+
+                // İlgili URL
+                String url = "https://www.paribucineverse.com/sinemalar/carrefour-bursa";
+
+                // Aranan film ismi
+                String filmIsmi = getIntent().getStringExtra("FILM_ISMI");
+
                 try {
-                    // Web sayfasını indir
-                    Document doc = Jsoup.connect(getIntent().getStringExtra("URL")).get();
+                    // URL'deki HTML içeriğini indir ve parse et
+                    Document doc = Jsoup.connect(url).get();
 
-                    // Belirli img etiketini seç (class adıyla)
-                    Element imgElement = doc.select("img.cinema-detail-movie-banner.img-fluid").get(getIntent().getIntExtra("ind", 0));
+                    // "row" classı olan tüm elementleri seçiyoruz
+                    Elements rows = doc.select(".row");
 
-                    // Eğer imgElement null değilse, src attribute'unu al
-                    if (imgElement != null) {
-                        String imgUrl = imgElement.absUrl("src");
+                    // Her "row" elementini kontrol ediyoruz
+                    for (Element row : rows) {
+                        // Eğer "data-movie-title" attribute'u aradığımız film ismine eşitse
+                        if (filmIsmi.equals(row.attr("data-movie-title"))) {
+                            // "cinema-detail-link" classını buluyoruz
+                            Element cinemaDetailLink = row.selectFirst(".cinema-detail-link");
 
-                        // Görsel URL'sini kullanarak resmi göster (UI işlemleri ana thread'de yapılmalı)
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                // Glide kullanarak görseli ImageView'a yükle
-                                Glide.with(Secili_film.this).load(imgUrl).into(imageView);
-                            }
-                        });
+                            // "cinema-detail-link" classı içerisindeki img etiketinin "src" attribute'unu alıyoruz
+                            String src = cinemaDetailLink.selectFirst("img").attr("src");
+
+                            // Sonucu Logcat'e yazdırıyoruz
+                            Log.d(TAG, "Film ismi: " + filmIsmi);
+                            Log.d(TAG, "Görselin src attribute'u: " + src);
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Glide kullanarak görseli ImageView'a yükle
+                                    Glide.with(Secili_film.this).load(src).into(imageView);
+                                }
+                            });
+
+
+                            // İlgili film bulunduğu için döngüyü sonlandırıyoruz
+                            break;
+                        }
                     }
+
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Bir hata oluştu: ", e);
                 }
             }
         }).start();

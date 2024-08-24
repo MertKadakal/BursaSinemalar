@@ -40,37 +40,52 @@ public class Avm_secili extends AppCompatActivity {
         items = new ArrayList<>();
         adapter = new HtmlArrayAdapter(this, R.layout.list_item, items);
         listView.setAdapter(adapter);
-        toptext = (TextView) findViewById(R.id.secili_avm_ust);
-        turAra = (EditText) findViewById(R.id.tur_giriniz);
+        toptext = findViewById(R.id.secili_avm_ust);
+        turAra = findViewById(R.id.tur_giriniz);
 
         if (getIntent().getStringExtra("AVM_ISMI").equals("Carrefour")) {
             String url = "https://www.paribucineverse.com/sinemalar/carrefour-bursa";
             new FetchDataTask().execute(url);
         }
 
-
         turAra.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    // Enter tuşuna basıldığında yapılacak işlemler
                     enteredText = turAra.getText().toString().toLowerCase();
-                    if (turFiltrele(enteredText).isEmpty()) {
+                    ArrayList<String> filteredItems = turFiltrele(enteredText);
+                    if (filteredItems.isEmpty()) {
                         Toast.makeText(Avm_secili.this, "İstenen türde film bulunamadı", Toast.LENGTH_SHORT).show();
-                    }
-                    else {
+                    } else {
                         try {
                             Intent intent = new Intent(Avm_secili.this, Aranan_tur.class);
-                            intent.putExtra("FILMLER", turFiltrele(enteredText).toString());
+                            intent.putExtra("FILMLER", filteredItems.toString());
                             intent.putExtra("TÜR", enteredText);
                             startActivity(intent);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
-                    return true; // Tuş olayını işlediğinizi belirtir
+                    return true;
                 }
-                return false; // Diğer tuş olaylarını işlemek için false döner
+                return false;
+            }
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String film_ismi = items.get(i).split("<br>")[0].split("<i>")[1].split("</i>")[0];
+                String film_turu = items.get(i).split("<br>")[2];
+                String film_saatleri = items.get(i).split("------")[2];
+
+                Intent intent = new Intent(Avm_secili.this, Secili_film.class);
+                intent.putExtra("FILM_ISMI", film_ismi);
+                intent.putExtra("FILM_TURU", film_turu);
+                intent.putExtra("FILM_SAATLERI", film_saatleri);
+                intent.putExtra("URL", getIntent().getStringExtra("URL"));
+                intent.putExtra("ind", i);
+                startActivity(intent);
             }
         });
     }
@@ -89,16 +104,14 @@ public class Avm_secili extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(String... urls) {
-
             String url = urls[0];
             try {
                 String topTextHtml = String.format("<b>%s AVM'de vizyondaki filmler</b>", getIntent().getStringExtra("AVM_ISMI"));
-                toptext.setText(Html.fromHtml(topTextHtml));
+                runOnUiThread(() -> toptext.setText(Html.fromHtml(topTextHtml)));
 
                 Document document = Jsoup.connect(url).get();
                 Elements films = document.select(".item-list-detail");
 
-                // Veriyi işleyin
                 for (Element film : films) {
                     String movieTitle = film.select("div.row").attr("data-movie-title");
                     String movieGenre = film.select("div[data-genre]").attr("data-genre");
@@ -114,46 +127,37 @@ public class Avm_secili extends AppCompatActivity {
                         if (to_add < last_added) {
                             times.append("***<br>");
                         }
-                        times.append(time.text() + "<br>");
+                        times.append(time.text()).append("<br>");
                     }
                     times.deleteCharAt(times.length() - 1);
 
-                    // HTML formatında stil ekleyin
                     items.add(String.format(
                             "<b><i>%s</i></b><br>------<br>%s<br>------<br>%s",
-                            movieTitle, movieGenre, String.valueOf(times)
+                            movieTitle, movieGenre, times.toString()
                     ));
+                    Log.d("saatler", items.get(items.size()-1));
                 }
+
+                int most_time = 0;
+                for (String item : items) {
+                    for (String saat : item.split("------")[2].split("<br>")) {
+                        if (!(saat.equals("***"))) {
+                            if (Integer.parseInt(saat.substring(0,5).split(":")[0])*60 + Integer.parseInt(saat.substring(0,5).split(":")[1]) > most_time) {
+                                most_time = Integer.parseInt(saat.split(":")[0])*60 + Integer.parseInt(saat.split(":")[1]);
+                            }
+                        }
+                    }
+
+                }
+                Toast.makeText(Avm_secili.this, String.valueOf(most_time), Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    String film_ismi = items.get(i).split("<br>")[0].split("<i>")[1].split("</i>")[0];
-                    String film_turu = items.get(i).split("<br>")[2];
-                    String film_saatleri = items.get(i).split("------")[2];
-
-                    Intent intent = new Intent(Avm_secili.this, Secili_film.class);
-                    intent.putExtra("FILM_ISMI", film_ismi);
-                    intent.putExtra("FILM_TURU", film_turu);
-                    intent.putExtra("FILM_SAATLERI", film_saatleri);
-                    intent.putExtra("URL", url);
-                    intent.putExtra("ind", i);
-                    startActivity(intent);
-                }
-            });
+            runOnUiThread(() -> adapter.notifyDataSetChanged());
 
             return null;
         }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            // Listeyi güncelle
-            adapter.notifyDataSetChanged();
-        }
-
     }
 }
 
