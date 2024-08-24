@@ -21,6 +21,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 
 public class Avm_secili extends AppCompatActivity {
@@ -30,6 +32,7 @@ public class Avm_secili extends AppCompatActivity {
     private TextView toptext;
     private EditText turAra;
     private String enteredText;
+    private TextView filmyok;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,8 @@ public class Avm_secili extends AppCompatActivity {
         listView.setAdapter(adapter);
         toptext = findViewById(R.id.secili_avm_ust);
         turAra = findViewById(R.id.tur_giriniz);
+        filmyok = (TextView) findViewById(R.id.film_yok);
+
 
         if (getIntent().getStringExtra("AVM_ISMI").equals("Carrefour")) {
             String url = "https://www.paribucineverse.com/sinemalar/carrefour-bursa";
@@ -135,23 +140,37 @@ public class Avm_secili extends AppCompatActivity {
                             "<b><i>%s</i></b><br>------<br>%s<br>------<br>%s",
                             movieTitle, movieGenre, times.toString()
                     ));
-                    Log.d("saatler", items.get(items.size()-1));
                 }
 
                 int most_time = 0;
                 for (String item : items) {
-                    for (String saat : item.split("------")[2].split("<br>")) {
-                        if (!(saat.equals("***"))) {
-                            if (Integer.parseInt(saat.substring(0,5).split(":")[0])*60 + Integer.parseInt(saat.substring(0,5).split(":")[1]) > most_time) {
-                                most_time = Integer.parseInt(saat.split(":")[0])*60 + Integer.parseInt(saat.split(":")[1]);
+                    for (int i = 0; i<item.split("------")[2].split("<br>").length;i++) {
+                        if (item.split("------")[2].split("<br>")[i].length()>4) {
+                            String saat = item.split("------")[2].split("<br>")[i].substring(0,5);
+                            int mins = Integer.parseInt(saat.split(":")[0])*60 + Integer.parseInt(saat.split(":")[1]);
+                            if (mins > most_time) {
+                                most_time = mins;
                             }
                         }
                     }
-
                 }
-                Toast.makeText(Avm_secili.this, String.valueOf(most_time), Toast.LENGTH_SHORT).show();
+
+                Calendar calendar = Calendar.getInstance();
+                int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                int minute = calendar.get(Calendar.MINUTE);
+                Log.d("tag", String.format("%d %d", hour, minute));
+                if (hour*60 + minute > most_time) {
+                    items.subList(1,items.size()).clear();
+                    items.set(0, "");
+                    listView.setVisibility(View.INVISIBLE);
+                    turAra.setVisibility(View.INVISIBLE);
+                    filmyok.setVisibility(View.VISIBLE);
+                }
+                else {
+                    filmyok.setVisibility(View.INVISIBLE);
+                }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.d("error", e.toString());
             }
 
             runOnUiThread(() -> adapter.notifyDataSetChanged());

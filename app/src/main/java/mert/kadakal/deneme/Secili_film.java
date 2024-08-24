@@ -17,8 +17,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
-
+import java.util.Collection;
+import java.util.Collections;
 
 public class Secili_film extends AppCompatActivity {
     private TextView film_ismi;
@@ -67,19 +69,54 @@ public class Secili_film extends AppCompatActivity {
         int seans_hour = 0;
         int seans_min = 0;
         int seans_mins = 0;
+        ArrayList<Integer> diffs = new ArrayList<>();
+        int stars_count = 0;
         for (String seans : getIntent().getStringExtra("FILM_SAATLERI").toString().substring(4, getIntent().getStringExtra("FILM_SAATLERI").toString().length()-3).split("<br>")) {
-            seans_hour = Integer.parseInt(seans.split(":")[0]);
-            seans_min = Integer.parseInt(seans.split(":")[1].substring(0,2));
-            if (seans_hour*60 + seans_min > current_mins) {
-                seans_mins = seans_hour*60 + seans_min;
-                break;
+            if (!(seans.equals("***"))) {
+                seans_hour = Integer.parseInt(seans.split(":")[0]);
+                seans_min = Integer.parseInt(seans.split(":")[1].substring(0,2));
+                if ((seans_hour*60 + seans_min) > current_mins) {
+                    diffs.add((seans_hour*60 + seans_min) - current_mins);
+                }
+                else {
+                    diffs.add(null);
+                }
+            }
+            else {
+                stars_count++;
             }
         }
-        if ((seans_mins-current_mins) < 60) {
-            en_yakin_seans.setText(String.format("En yakın seans %d dakika sonra", (seans_mins-current_mins)%60));
+        int min_diff = 9999;
+        for (Integer element : diffs) {
+            if (element != null && element < min_diff) {
+                min_diff = element;
+            }
+        }
+        if (!(min_diff == 9999)) {
+            int ind_min_diff = diffs.indexOf(min_diff);
+            String seans = getIntent().getStringExtra("FILM_SAATLERI").toString().substring(4, getIntent().getStringExtra("FILM_SAATLERI").toString().length()-3).split("<br>")[ind_min_diff+stars_count];
+            seans_hour = Integer.parseInt(seans.split(":")[0]);
+            seans_min = Integer.parseInt(seans.split(":")[1]);
+            seans_mins = seans_hour*60 + seans_min;
+            Log.d("tag", seans);
+            Log.d("tag", diffs.toString());
+            Log.d("tag", String.valueOf(min_diff));
+            Log.d("tag", String.valueOf(ind_min_diff));
+        }
+
+        if ((seans_mins-current_mins)%60 < 0) {
+            en_yakin_seans.setText("Tüm seanslar geride kaldı");
         }
         else {
-            en_yakin_seans.setText(String.format("En yakın seans %d saat %d dakika sonra", (seans_mins-current_mins)/60, (seans_mins-current_mins)%60));
+            if ((seans_mins-current_mins) < 60) {
+                en_yakin_seans.setText(String.format("En yakın seans %d dakika sonra", (seans_mins-current_mins)%60));
+            }
+            else if ((seans_mins-current_mins)%60 == 0) {
+                en_yakin_seans.setText(String.format("En yakın seans %d saat sonra", (seans_mins-current_mins)/60));
+            }
+            else {
+                en_yakin_seans.setText(String.format("En yakın seans %d saat %d dakika sonra", (seans_mins-current_mins)/60, (seans_mins-current_mins)%60));
+            }
         }
 
         imageView = findViewById(R.id.imageView);
@@ -126,7 +163,6 @@ public class Secili_film extends AppCompatActivity {
                                     Glide.with(Secili_film.this).load(src).into(imageView);
                                 }
                             });
-
 
                             // İlgili film bulunduğu için döngüyü sonlandırıyoruz
                             break;
