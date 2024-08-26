@@ -90,6 +90,7 @@ public class Avm_secili extends AppCompatActivity {
                 intent.putExtra("FILM_SAATLERI", film_saatleri);
                 intent.putExtra("URL", getIntent().getStringExtra("URL"));
                 intent.putExtra("ind", i);
+                intent.putExtra("AVM", getIntent().getStringExtra("AVM_ISMI"));
                 startActivity(intent);
             }
         });
@@ -114,59 +115,66 @@ public class Avm_secili extends AppCompatActivity {
                 String topTextHtml = String.format("<b>%s AVM'de vizyondaki filmler</b>", getIntent().getStringExtra("AVM_ISMI"));
                 runOnUiThread(() -> toptext.setText(Html.fromHtml(topTextHtml)));
 
-                Document document = Jsoup.connect(url).get();
-                Elements films = document.select(".item-list-detail");
+                //AVM ismine göre film listesini hazırla
+                if (getIntent().getStringExtra("AVM_ISMI").equals("Carrefour")) { //"CARREFOUR" için listeleme
+                    Document document = Jsoup.connect(url).get();
+                    Elements films = document.select(".item-list-detail");
 
-                for (Element film : films) {
-                    String movieTitle = film.select("div.row").attr("data-movie-title");
-                    String movieGenre = film.select("div[data-genre]").attr("data-genre");
-                    StringBuilder times = new StringBuilder();
-                    for (Element time : film.select("div.times-area").select("a[data-time]")) {
-                        int to_add = Integer.parseInt(time.text().split(":")[0]);
-                        int last_added = 0;
-                        try {
-                            last_added = Integer.parseInt(times.toString().split("<br>")[times.toString().split("<br>").length-1].split(":")[0]);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                    for (Element film : films) {
+                        String movieTitle = film.select("div.row").attr("data-movie-title");
+                        String movieGenre = film.select("div[data-genre]").attr("data-genre");
+                        StringBuilder times = new StringBuilder();
+                        for (Element time : film.select("div.times-area").select("a[data-time]")) {
+                            int to_add = Integer.parseInt(time.text().split(":")[0]);
+                            int last_added = 0;
+                            try {
+                                last_added = Integer.parseInt(times.toString().split("<br>")[times.toString().split("<br>").length-1].split(":")[0]);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            if (to_add < last_added) {
+                                times.append("***<br>");
+                            }
+                            times.append(time.text()).append("<br>");
                         }
-                        if (to_add < last_added) {
-                            times.append("***<br>");
-                        }
-                        times.append(time.text()).append("<br>");
+                        times.deleteCharAt(times.length() - 1);
+
+                        items.add(String.format(
+                                "<b><i>%s</i></b><br>------<br>%s<br>------<br>%s",
+                                movieTitle, movieGenre, times.toString()
+                        ));
                     }
-                    times.deleteCharAt(times.length() - 1);
 
-                    items.add(String.format(
-                            "<b><i>%s</i></b><br>------<br>%s<br>------<br>%s",
-                            movieTitle, movieGenre, times.toString()
-                    ));
-                }
-
-                int most_time = 0;
-                for (String item : items) {
-                    for (int i = 0; i<item.split("------")[2].split("<br>").length;i++) {
-                        if (item.split("------")[2].split("<br>")[i].length()>4) {
-                            String saat = item.split("------")[2].split("<br>")[i].substring(0,5);
-                            int mins = Integer.parseInt(saat.split(":")[0])*60 + Integer.parseInt(saat.split(":")[1]);
-                            if (mins > most_time) {
-                                most_time = mins;
+                    //tüm saatlerden en geç olanını belirle
+                    int most_time = 0;
+                    for (String item : items) {
+                        for (int i = 0; i<item.split("------")[2].split("<br>").length;i++) {
+                            if (item.split("------")[2].split("<br>")[i].length()>4) {
+                                String saat = item.split("------")[2].split("<br>")[i].substring(0,5);
+                                int mins = Integer.parseInt(saat.split(":")[0])*60 + Integer.parseInt(saat.split(":")[1]);
+                                if (mins > most_time) {
+                                    most_time = mins;
+                                }
                             }
                         }
                     }
-                }
 
-                Calendar calendar = Calendar.getInstance();
-                int hour = calendar.get(Calendar.HOUR_OF_DAY);
-                int minute = calendar.get(Calendar.MINUTE);
-                Log.d("tag", String.format("%d %d", hour, minute));
-                if (hour*60 + minute > most_time) {
-                    items.subList(1,items.size()).clear();
-                    items.set(0, "");
-                    listView.setVisibility(View.INVISIBLE);
-                    turAra.setVisibility(View.INVISIBLE);
-                    filmyok.setVisibility(View.VISIBLE);
-                }
-                else {
+                    /*
+                    //belirlenen en son saatten de geçmişse ekrana "film yok" mesajı yaz
+                    Calendar calendar = Calendar.getInstance();
+                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                    int minute = calendar.get(Calendar.MINUTE);
+                    if (hour*60 + minute > most_time) {
+                        items.subList(1,items.size()).clear();
+                        items.set(0, "");
+                        listView.setVisibility(View.INVISIBLE);
+                        turAra.setVisibility(View.INVISIBLE);
+                        filmyok.setVisibility(View.VISIBLE);
+                    }
+                    else {
+                        filmyok.setVisibility(View.INVISIBLE);
+                    }
+                    */
                     filmyok.setVisibility(View.INVISIBLE);
                 }
             } catch (Exception e) {

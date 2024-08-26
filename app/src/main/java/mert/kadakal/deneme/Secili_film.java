@@ -1,8 +1,11 @@
 package mert.kadakal.deneme;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,7 +30,7 @@ public class Secili_film extends AppCompatActivity {
     private TextView film_turu;
     private TextView film_saatleri;
     private TextView en_yakin_seans;
-
+    private ImageButton info_button;
     private ImageView imageView;
 
     @Override
@@ -38,10 +41,23 @@ public class Secili_film extends AppCompatActivity {
         film_ismi = (TextView) findViewById(R.id.film_ismi);
         film_ismi.setText(Html.fromHtml(String.format("<b>%s</b>", getIntent().getStringExtra("FILM_ISMI"))));
 
+        //film bilgileri tuşu
+        info_button = (ImageButton) findViewById(R.id.info_button);
+        info_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Secili_film.this, Film_infos.class);
+                intent.putExtra("FILM_ISMI", getIntent().getStringExtra("FILM_ISMI"));
+                intent.putExtra("AVM", getIntent().getStringExtra("AVM"));
+                startActivity(intent);
+            }
+        });
+
         String film_turuHtml = String.format("<b>Tür</b><br><br>%s", getIntent().getStringExtra("FILM_TURU"));
         film_turu = (TextView) findViewById(R.id.film_turu);
         film_turu.setText(Html.fromHtml(film_turuHtml));
 
+        //en yakın 3 seansı kapağın sağ altına listele
         film_saatleri = (TextView) findViewById(R.id.film_saatler);
         film_saatleri.setText(getIntent().getStringExtra("FILM_SAATLERI"));
         StringBuilder saatlerListe = new StringBuilder();
@@ -98,12 +114,9 @@ public class Secili_film extends AppCompatActivity {
             seans_hour = Integer.parseInt(seans.split(":")[0]);
             seans_min = Integer.parseInt(seans.split(":")[1]);
             seans_mins = seans_hour*60 + seans_min;
-            Log.d("tag", seans);
-            Log.d("tag", diffs.toString());
-            Log.d("tag", String.valueOf(min_diff));
-            Log.d("tag", String.valueOf(ind_min_diff));
         }
 
+        //en yakın seansa kalan süreyi yaz
         if ((seans_mins-current_mins)%60 < 0) {
             en_yakin_seans.setText("Tüm seanslar geride kaldı");
         }
@@ -123,54 +136,57 @@ public class Secili_film extends AppCompatActivity {
 
         // Görseli web sayfasından çekmek için yeni bir thread başlatın
         new Thread(new Runnable() {
-            String img_url = null;
             @Override
             public void run() {
-                // Logcat için Tag
-                String TAG = "FilmSrcLogger";
 
-                // İlgili URL
-                String url = "https://www.paribucineverse.com/sinemalar/carrefour-bursa";
+                //AVM'ye göre seçilen filmin kapağını görüntüle
+                if (getIntent().getStringExtra("AVM").equals("Carrefour")) { //"CARREFOUR" için görüntüleme
+                    // Logcat için Tag
+                    String TAG = "secilifilm";
 
-                // Aranan film ismi
-                String filmIsmi = getIntent().getStringExtra("FILM_ISMI");
+                    // İlgili URL
+                    String url = "https://www.paribucineverse.com/sinemalar/carrefour-bursa";
 
-                try {
-                    // URL'deki HTML içeriğini indir ve parse et
-                    Document doc = Jsoup.connect(url).get();
+                    // Aranan film ismi
+                    String filmIsmi = getIntent().getStringExtra("FILM_ISMI");
 
-                    // "row" classı olan tüm elementleri seçiyoruz
-                    Elements rows = doc.select(".row");
+                    try {
+                        // URL'deki HTML içeriğini indir ve parse et
+                        Document doc = Jsoup.connect(url).get();
 
-                    // Her "row" elementini kontrol ediyoruz
-                    for (Element row : rows) {
-                        // Eğer "data-movie-title" attribute'u aradığımız film ismine eşitse
-                        if (filmIsmi.equals(row.attr("data-movie-title"))) {
-                            // "cinema-detail-link" classını buluyoruz
-                            Element cinemaDetailLink = row.selectFirst(".cinema-detail-link");
+                        // "row" classı olan tüm elementleri seçiyoruz
+                        Elements rows = doc.select(".row");
 
-                            // "cinema-detail-link" classı içerisindeki img etiketinin "src" attribute'unu alıyoruz
-                            String src = cinemaDetailLink.selectFirst("img").attr("src");
+                        // Her "row" elementini kontrol ediyoruz
+                        for (Element row : rows) {
+                            // Eğer "data-movie-title" attribute'u aradığımız film ismine eşitse
+                            if (filmIsmi.equals(row.attr("data-movie-title"))) {
+                                // "cinema-detail-link" classını buluyoruz
+                                Element cinemaDetailLink = row.selectFirst(".cinema-detail-link");
 
-                            // Sonucu Logcat'e yazdırıyoruz
-                            Log.d(TAG, "Film ismi: " + filmIsmi);
-                            Log.d(TAG, "Görselin src attribute'u: " + src);
+                                // "cinema-detail-link" classı içerisindeki img etiketinin "src" attribute'unu alıyoruz
+                                String src = cinemaDetailLink.selectFirst("img").attr("src");
 
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Glide kullanarak görseli ImageView'a yükle
-                                    Glide.with(Secili_film.this).load(src).into(imageView);
-                                }
-                            });
+                                // Sonucu Logcat'e yazdırıyoruz
+                                Log.d(TAG, "Film ismi: " + filmIsmi);
+                                Log.d(TAG, "Görselin src attribute'u: " + src);
 
-                            // İlgili film bulunduğu için döngüyü sonlandırıyoruz
-                            break;
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        // Glide kullanarak görseli ImageView'a yükle
+                                        Glide.with(Secili_film.this).load(src).into(imageView);
+                                    }
+                                });
+
+                                // İlgili film bulunduğu için döngüyü sonlandırıyoruz
+                                break;
+                            }
                         }
-                    }
 
-                } catch (IOException e) {
-                    Log.e(TAG, "Bir hata oluştu: ", e);
+                    } catch (IOException e) {
+                        Log.e(TAG, "Bir hata oluştu: ", e);
+                    }
                 }
             }
         }).start();
