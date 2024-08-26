@@ -41,6 +41,8 @@ dependencies {
     implementation(libs.google.material)
     implementation(files("C:\\Users\\HP\\OneDrive\\Masaüstü\\jsoup-1.18.1.jar"))
     implementation(libs.media3.common)
+    implementation(libs.cronet.embedded)
+    implementation(libs.tracing.perfetto.handshake)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

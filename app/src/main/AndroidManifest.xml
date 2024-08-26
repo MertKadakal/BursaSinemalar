@@ -37,6 +37,7 @@
             android:name="mert.kadakal.deneme.Film_infos"
             android:exported="true">
         </activity>
+
     </application>
 
 </manifest>

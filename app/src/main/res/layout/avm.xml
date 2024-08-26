@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:visibility="invisible"
         android:text="Film bulunamadı\nBugünkü seanslar bitmiş olabilir"
         android:textSize="20sp"
         android:translationY="200sp" />
