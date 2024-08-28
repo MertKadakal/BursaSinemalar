@@ -4,7 +4,7 @@ Uygulama sadece Bursa için geçerli olup şimdilik şehirdeki 2 sinema salonu u
 
 Anasayfadan istediğiniz sinema salonunu seçebilir, filmleri türlerine göre filtreleyebilir veya filmleri seçerek daha detaylı bilgiye sahip olabilirsiniz.
 
-—————————————————————————————————————————————————————————————
+
 **Uygulamanın içeriğinden görüntüler:**
 
 
