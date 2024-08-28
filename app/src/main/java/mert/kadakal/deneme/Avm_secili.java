@@ -26,23 +26,25 @@ import java.util.GregorianCalendar;
 
 
 public class Avm_secili extends AppCompatActivity {
-    private ListView listView;
+    private ListView film_listesi;
     private ArrayList<String> items;
     private HtmlArrayAdapter adapter;
     private TextView toptext;
     private EditText turAra;
     private String enteredText;
     private TextView filmyok;
+    private String film_info_page_url;
+    private ArrayList<String> film_info_page_url_list = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.avm);
 
-        listView = findViewById(R.id.liste);
+        film_listesi = findViewById(R.id.liste);
         items = new ArrayList<>();
         adapter = new HtmlArrayAdapter(this, R.layout.list_item, items);
-        listView.setAdapter(adapter);
+        film_listesi.setAdapter(adapter);
         toptext = findViewById(R.id.secili_avm_ust);
         turAra = findViewById(R.id.tur_giriniz);
         filmyok = (TextView) findViewById(R.id.film_yok);
@@ -63,15 +65,17 @@ public class Avm_secili extends AppCompatActivity {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
                     enteredText = turAra.getText().toString().toLowerCase();
-                    ArrayList<String> filteredItems = turFiltrele(enteredText);
+                    ArrayList<String> filteredItems = turFiltrele(enteredText, getIntent().getStringExtra("AVM_ISMI"));
                     if (filteredItems.isEmpty()) {
                         Toast.makeText(Avm_secili.this, "İstenen türde film bulunamadı", Toast.LENGTH_SHORT).show();
                     } else {
                         try {
                             Intent intent = new Intent(Avm_secili.this, Aranan_tur.class);
-                            intent.putExtra("FILMLER", filteredItems.toString());
+                            intent.putStringArrayListExtra("FILMLER", filteredItems);
                             intent.putExtra("TÜR", enteredText);
+                            intent.putExtra("AVM_ISMI", getIntent().getStringExtra("AVM_ISMI"));
                             startActivity(intent);
+                            Log.d("filtre", filteredItems.toString());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -82,31 +86,55 @@ public class Avm_secili extends AppCompatActivity {
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //listedeki bir filmin seçilmesi
+        film_listesi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String film_ismi = items.get(i).split("<br>")[0].split("<i>")[1].split("</i>")[0];
-                String film_turu = items.get(i).split("<br>")[2];
-                String film_saatleri = items.get(i).split("------")[2];
+                try {
+                    String film_ismi = items.get(i).split("<br>")[0].split("<i>")[1].split("</i>")[0];
+                    String film_turu = items.get(i).split("<br>")[2];
+                    String film_saatleri = items.get(i).split("------")[2];
 
-                Intent intent = new Intent(Avm_secili.this, Secili_film.class);
-                intent.putExtra("FILM_ISMI", film_ismi);
-                intent.putExtra("FILM_TURU", film_turu);
-                intent.putExtra("FILM_SAATLERI", film_saatleri);
-                intent.putExtra("URL", getIntent().getStringExtra("URL"));
-                intent.putExtra("ind", i);
-                intent.putExtra("AVM", getIntent().getStringExtra("AVM_ISMI"));
-                startActivity(intent);
+                    Intent intent = new Intent(Avm_secili.this, Secili_film.class);
+                    intent.putExtra("FILM_ISMI", film_ismi);
+                    intent.putExtra("FILM_TURU", film_turu);
+                    intent.putExtra("FILM_SAATLERI", film_saatleri);
+                    intent.putExtra("URL", getIntent().getStringExtra("URL"));
+                    intent.putExtra("ind", i);
+                    intent.putExtra("AVM", getIntent().getStringExtra("AVM_ISMI"));
+                    if (getIntent().getStringExtra("AVM_ISMI").equals("Korupark")) {
+                        intent.putExtra("FILM_INFO_URL", film_info_page_url_list.get(i));
+                    }
+                    startActivity(intent);
+                }catch (Exception e) {
+                    Log.d("error", e.getMessage());
+                }
+
             }
         });
     }
 
-    private ArrayList<String> turFiltrele(String aranan) {
+    private ArrayList<String> turFiltrele(String aranan, String avm_ismi) {
         ArrayList<String> aranan_turdekiler = new ArrayList<>();
-        for (String item : items) {
-            if (item.toLowerCase().split("<br>")[2].equals(aranan)) {
-                aranan_turdekiler.add(item);
-            }
+        switch (avm_ismi) {
+            case "Carrefour":
+                for (String item : items) {
+                    if (item.toLowerCase().split("<br>")[2].equals(aranan.toLowerCase())) {
+                        aranan_turdekiler.add(item);
+                    }
+                }
+                break;
+            case "Korupark":
+                for (String item : items) {
+                    String[] turler = item.toLowerCase().split("<br>")[2].split(", ");
+                    for (String tur : turler) {
+                        if (tur.toLowerCase().equals(aranan.toLowerCase())) {
+                            aranan_turdekiler.add(item);
+                            break;
+                        }
+                    }
+                }
+                break;
         }
         return aranan_turdekiler;
     }
@@ -149,8 +177,7 @@ public class Avm_secili extends AppCompatActivity {
 
                             items.add(String.format(
                                     "<b><i>%s</i></b><br>------<br>%s<br>------<br>%s",
-                                    movieTitle, movieGenre, times.toString()
-                            ));
+                                    movieTitle, movieGenre, times));
                         }
                         break;
 
@@ -162,16 +189,24 @@ public class Avm_secili extends AppCompatActivity {
                             String movie_title = film.select("div.meta")
                                     .select("h2 > a").text();
 
+                            film_info_page_url = "https://www.beyazperde.com" + film.select("div.meta")
+                                    .select("h2 > a").attr("href");
+                            film_info_page_url_list.add(film_info_page_url);
+
                             //filmin vizyon tarihi + türleri + ülkeleri
                             String vizyon_tur_ulke = film.select("div.meta")
                                     .select("div.meta-body > div.meta-body-item.meta-body-info").text();
 
                             String vizyona_giris = vizyon_tur_ulke.split(" \\|")[0];
-                            String türler = vizyon_tur_ulke.split("\\| ")[1].split(" /")[0];
-                            String ülkeler = vizyon_tur_ulke.split("/ ")[1];
+                            String genres = vizyon_tur_ulke.split("\\| ")[1].split(" /")[0];
+                            String countries = vizyon_tur_ulke.split("/ ")[1];
+                            StringBuilder showtimes = new StringBuilder();
+                            for (Element showtime : film.select("span.showtimes-hour-item-value")) {
+                                showtimes.append(showtime.text() + "<br>");
+                            }
+                            showtimes.deleteCharAt(showtimes.length()-1);
 
-                            items.add(String.format("%s\n%s", movie_title, türler));
-                            Log.d("tag", türler);
+                            items.add(String.format("<b><i>%s</i></b><br>------<br>%s<br>------<br>%s", movie_title, genres, showtimes));
                         }
                         break;
 

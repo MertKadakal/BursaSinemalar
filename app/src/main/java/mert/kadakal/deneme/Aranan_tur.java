@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 
 public class Aranan_tur extends AppCompatActivity {
-    private ListView listView;
+    private ListView film_listesi;
     private ArrayList<String> items;
     private HtmlArrayAdapter adapter;
     private TextView topText;
@@ -28,19 +28,18 @@ public class Aranan_tur extends AppCompatActivity {
         setContentView(R.layout.aranantur);
 
         items = new ArrayList<>();
-        listView = findViewById(R.id.liste);
+        film_listesi = findViewById(R.id.liste);
         adapter = new HtmlArrayAdapter(this, R.layout.list_item, items);
-        listView.setAdapter(adapter);
+        film_listesi.setAdapter(adapter);
         topText = (TextView) findViewById(R.id.aranan_tur_ust);
         String toptextHtml = String.format("<b>%s türündeki filmler</b>", String.valueOf(getIntent().getStringExtra("TÜR").toUpperCase().charAt(0)) + getIntent().getStringExtra("TÜR").toLowerCase().substring(1));
         topText.setText(Html.fromHtml(toptextHtml));
 
-        Log.d("Türdeki filmler", getIntent().getStringExtra("FILMLER").substring(1));
-        for (String item : getIntent().getStringExtra("FILMLER").substring(1).split(",")) {
+        for (String item : getIntent().getStringArrayListExtra("FILMLER")) {
             items.add(item);
         }
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        film_listesi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String film_ismi = items.get(i).split("<br>")[0].split("<i>")[1].split("</i>")[0];
@@ -54,6 +53,7 @@ public class Aranan_tur extends AppCompatActivity {
                 intent.putExtra("FILM_SAATLERI", film_saatleri);
                 intent.putExtra("URL", url);
                 intent.putExtra("ind", i);
+                intent.putExtra("AVM", getIntent().getStringExtra("AVM_ISMI"));
                 startActivity(intent);
             }
         });

@@ -39,7 +39,7 @@ public class Secili_film extends AppCompatActivity {
         setContentView(R.layout.secili_film);
 
         film_ismi = (TextView) findViewById(R.id.film_ismi);
-        film_ismi.setText(Html.fromHtml(String.format("<b>%s</b>", getIntent().getStringExtra("FILM_ISMI"))));
+        film_ismi.setText(Html.fromHtml(String.format("<b>%s</b>", getIntent().getStringExtra("FILM_ISMI").trim())));
 
         //film bilgileri tuşu
         info_button = (ImageButton) findViewById(R.id.info_button);
@@ -47,13 +47,25 @@ public class Secili_film extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Secili_film.this, Film_infos.class);
-                intent.putExtra("FILM_ISMI", getIntent().getStringExtra("FILM_ISMI"));
+                intent.putExtra("FILM_ISMI", getIntent().getStringExtra("FILM_ISMI").trim());
                 intent.putExtra("AVM", getIntent().getStringExtra("AVM"));
+                intent.putExtra("FILM_INFO_URL", getIntent().getStringExtra("FILM_INFO_URL"));
                 startActivity(intent);
             }
         });
 
-        String film_turuHtml = String.format("<b>Tür</b><br><br>%s", getIntent().getStringExtra("FILM_TURU"));
+        //film türünü kapağın sol altında listele
+        String film_turuHtml;
+        if (getIntent().getStringExtra("FILM_TURU").split(",").length > 0) {
+            StringBuilder genres = new StringBuilder();
+            for (String genre : getIntent().getStringExtra("FILM_TURU").split(", ")) {
+                genres.append(genre + "<br>");
+            }
+            film_turuHtml = "<b>Tür</b><br><br>" + genres;
+        }
+        else {
+            film_turuHtml = String.format("<b>Tür</b><br><br>%s", getIntent().getStringExtra("FILM_TURU"));
+        }
         film_turu = (TextView) findViewById(R.id.film_turu);
         film_turu.setText(Html.fromHtml(film_turuHtml));
 
@@ -140,53 +152,95 @@ public class Secili_film extends AppCompatActivity {
             public void run() {
 
                 //AVM'ye göre seçilen filmin kapağını görüntüle
-                if (getIntent().getStringExtra("AVM").equals("Carrefour")) { //"CARREFOUR" için görüntüleme
-                    // Logcat için Tag
-                    String TAG = "secilifilm";
+                switch (getIntent().getStringExtra("AVM")) {
+                    //CARREFOUR
+                    case "Carrefour":
+                        // Logcat için Tag
+                        String TAG = "secilifilm";
 
-                    // İlgili URL
-                    String url = "https://www.paribucineverse.com/sinemalar/carrefour-bursa";
+                        // İlgili URL
+                        String url = "https://www.paribucineverse.com/sinemalar/carrefour-bursa";
 
-                    // Aranan film ismi
-                    String filmIsmi = getIntent().getStringExtra("FILM_ISMI");
+                        // Aranan film ismi
+                        String filmIsmi = getIntent().getStringExtra("FILM_ISMI");
 
-                    try {
-                        // URL'deki HTML içeriğini indir ve parse et
-                        Document doc = Jsoup.connect(url).get();
+                        try {
+                            // URL'deki HTML içeriğini indir ve parse et
+                            Document doc = Jsoup.connect(url).get();
 
-                        // "row" classı olan tüm elementleri seçiyoruz
-                        Elements rows = doc.select(".row");
+                            // "row" classı olan tüm elementleri seçiyoruz
+                            Elements rows = doc.select(".row");
 
-                        // Her "row" elementini kontrol ediyoruz
-                        for (Element row : rows) {
-                            // Eğer "data-movie-title" attribute'u aradığımız film ismine eşitse
-                            if (filmIsmi.equals(row.attr("data-movie-title"))) {
-                                // "cinema-detail-link" classını buluyoruz
-                                Element cinemaDetailLink = row.selectFirst(".cinema-detail-link");
+                            // Her "row" elementini kontrol ediyoruz
+                            for (Element row : rows) {
+                                // Eğer "data-movie-title" attribute'u aradığımız film ismine eşitse
+                                if (filmIsmi.equals(row.attr("data-movie-title"))) {
+                                    // "cinema-detail-link" classını buluyoruz
+                                    Element cinemaDetailLink = row.selectFirst(".cinema-detail-link");
 
-                                // "cinema-detail-link" classı içerisindeki img etiketinin "src" attribute'unu alıyoruz
-                                String src = cinemaDetailLink.selectFirst("img").attr("src");
+                                    // "cinema-detail-link" classı içerisindeki img etiketinin "src" attribute'unu alıyoruz
+                                    String src = cinemaDetailLink.selectFirst("img").attr("src");
 
-                                // Sonucu Logcat'e yazdırıyoruz
-                                Log.d(TAG, "Film ismi: " + filmIsmi);
-                                Log.d(TAG, "Görselin src attribute'u: " + src);
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            // Glide kullanarak görseli ImageView'a yükle
+                                            Glide.with(Secili_film.this).load(src).into(imageView);
+                                        }
+                                    });
 
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        // Glide kullanarak görseli ImageView'a yükle
-                                        Glide.with(Secili_film.this).load(src).into(imageView);
-                                    }
-                                });
-
-                                // İlgili film bulunduğu için döngüyü sonlandırıyoruz
-                                break;
+                                    // İlgili film bulunduğu için döngüyü sonlandırıyoruz
+                                    break;
+                                }
                             }
-                        }
 
-                    } catch (IOException e) {
-                        Log.e(TAG, "Bir hata oluştu: ", e);
-                    }
+                        } catch (IOException e) {
+                            Log.e(TAG, "Bir hata oluştu: ", e);
+                        }
+                        break;
+
+                    //KORUPARK
+                    case "Korupark":
+                        // Logcat için Tag
+                        TAG = "secilifilm";
+
+                        // İlgili URL
+                        url = "https://www.beyazperde.com/sinemalar/sinema-T0085/";
+
+                        // Aranan film ismi
+                        filmIsmi = getIntent().getStringExtra("FILM_ISMI");
+
+                        try {
+                            // URL'deki HTML içeriğini indir ve parse et
+                            Document doc = Jsoup.connect(url).get();
+
+                            // Belirli bir class ismine sahip tüm <a> etiketlerini seç
+                            Elements links = doc.select(".movie-card-theater a[href]");
+
+                            // Her bir <a> etiketinin href değerini yazdır
+                            for (Element link : links) {
+                                String info_url = "https://www.beyazperde.com" + link.attr("href");
+                                Document doc_info = Jsoup.connect(info_url).get();
+
+                                // <img> etiketini seç ve src özniteliğini al
+                                Element img = doc_info.select("img.thumbnail-img").first();
+                                if ((img != null) && (img.attr("alt").trim().equals(filmIsmi))) {
+                                    String src = img.attr("src");
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            // Glide kullanarak görseli ImageView'a yükle
+                                            Glide.with(Secili_film.this).load(src).into(imageView);
+                                            String info_url_final = "https://www.beyazperde.com" + link.attr("href");;
+                                        }
+                                    });
+                                    break;
+                                }
+                            }
+                        } catch (IOException e) {
+                            Log.d("err", e.toString());
+                        }
+                        break;
                 }
             }
         }).start();
