@@ -4,11 +4,11 @@ Uygulama sadece Bursa için geçerli olup şimdilik şehirdeki 2 sinema salonu u
 
 Anasayfadan istediğiniz sinema salonunu seçebilir, filmleri türlerine göre filtreleyebilir veya filmleri seçerek daha detaylı bilgiye sahip olabilirsiniz.
 
-
+—————————————————————————————————————————————————————————————
 **Uygulamanın içeriğinden görüntüler:**
 
 
-------------------------------***ANASAYFA***------------------------------
+***ANASAYFA***
 
 ![anasayfa](https://github.com/MertKadakal/BursaSinemalar/blob/master/Screenshots/Anasayfa.png)
 __________________________________________________________
