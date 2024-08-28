@@ -1,4 +1,4 @@
-Sinema salonlarında vizyonda olan filmleri öğrenmek için internet sitelerini incelemekten kaynaklanan zaman kaybına çözüm olarak geliştirilmiştir.
+Sinema salonlarında vizyondahi filmleri öğrenmek için internet sitelerini incelemekten kaynaklanan zaman kaybına çözüm olarak geliştirilmiştir.
 
 Uygulama sadece Bursa için geçerli olup şimdilik şehirdeki 2 sinema salonu uygulamaya eklenmiştir.
 
