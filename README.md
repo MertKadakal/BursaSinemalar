@@ -2,7 +2,7 @@ Sinema salonlarında vizyondaki filmleri öğrenmek için internet sitelerini in
 
 Uygulama sadece Bursa için geçerli olup şimdilik şehirdeki 2 sinema salonu uygulamaya eklenmiştir.
 
-Anasayfadan istediğiniz sinema salonunu seçebilir, filmleri türlerine göre filtreleyebilir ve filmleri seçerek daha detaylı bilgiye sahip olabilirsiniz.
+Anasayfadan istediğiniz sinema salonunu seçebilir, filmleri türlerine göre filtreleyebilir veya filmleri seçerek daha detaylı bilgiye sahip olabilirsiniz.
 
 
 **Uygulamanın içeriğinden görüntüler:**
