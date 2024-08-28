@@ -14,6 +14,8 @@
         android:layout_height="wrap_content"
         android:fontFamily="serif"
         android:text="Bursa Sinemalar"
+        android:textColor="@color/backgroundColor"
+        android:textColorLink="#FFFFFF"
         android:textIsSelectable="false"
         android:textSize="40dp"
         android:textStyle="bold"
@@ -26,27 +28,37 @@
 
     <Button
         android:id="@+id/Carrefour"
-        android:layout_width="158dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="104dp"
+        android:layout_width="336dp"
+        android:layout_height="137dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="120dp"
-        android:text="Carrefour"
+        android:background="@drawable/rounded_button"
+        android:fontFamily="serif"
+        android:text="Carrefour AVM"
+        android:textAlignment="gravity"
+        android:textColor="#FFFFFF"
+        android:textSize="30dp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.417" />
+        app:layout_constraintVertical_bias="0.338" />
 
     <Button
         android:id="@+id/Korupark"
-        android:layout_width="158dp"
-        android:layout_height="48dp"
-        android:text="Korupark"
+        android:layout_width="336dp"
+        android:layout_height="137dp"
+        android:background="@drawable/rounded_button"
+        android:fontFamily="serif"
+        android:text="Korupark AVM"
+        android:textSize="30dp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/Carrefour"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/Carrefour"
         app:layout_constraintTop_toBottomOf="@+id/Carrefour"
-        app:layout_constraintVertical_bias="0.15" />
+        app:layout_constraintVertical_bias="0.163" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Yuvarlak köşeli, siyah renkli arka plan -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#4D3C3C" />
+            <!-- Yuvarlak köşeler -->
+            <corners android:radius="25dp" />
+            <stroke android:width="3dp" android:color="#808080"/>
+        </shape>
+    </item>
+    <!-- Arka plan görseli -->
+    <item>
+        <bitmap android:src="@drawable/salon" />
+        <corners android:radius="25dp" />
+    </item>
+
+</layer-list>

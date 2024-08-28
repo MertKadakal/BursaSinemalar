@@ -1,5 +1,5 @@
 <resources>
-    <string name="deneme">deneme</string>
+    <string name="deneme">Bursa Sinemalar</string>
     <string-array name="spinner_items">
         <item>Öğe 1</item>
         <item>Öğe 2</item>
