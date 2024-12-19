@@ -18,9 +18,9 @@
 
     <ListView
         android:id="@+id/liste"
-        android:layout_width="wrap_content"
-        android:layout_height="582dp"
-        android:translationY="90sp" >
+        android:layout_width="368dp"
+        android:layout_height="498dp"
+        android:translationY="70sp">
 
     </ListView>
 
@@ -29,22 +29,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:gravity="center"
         android:text="deneme"
-        android:textSize="25sp"
-        android:gravity="center"/>
+        android:textSize="20sp" />
 
     <EditText
         android:id="@+id/tur_giriniz"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/liste"
+        android:layout_marginTop="29dp"
         android:clickable="false"
         android:editable="false"
         android:ems="10"
         android:hint="Türe göre arama yap"
         android:inputType="text"
         android:textIsSelectable="false"
-        android:translationY="680dp" />
-
+        android:translationY="50dp" />
 
 
 </RelativeLayout>
